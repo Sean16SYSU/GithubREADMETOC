@@ -1,7 +1,5 @@
 import os
 
-import os
-
 
 def toc(file='README.md',
         stpath='.',
@@ -14,36 +12,23 @@ def toc(file='README.md',
               firstNotInSet=['.', '_']):
         def rec_toc_f(stpath='.', stopwith='dir'):
             totalstr_arr = []
-            for _, dirs, files in os.walk(stpath):
-                for dir_name in dirs:
-                    if dir_name[0] in firstNotInSet:
-                        continue
+
+            for name in os.listdir(stpath):
+                if name[0] in firstNotInSet:
+                    continue
+                totalpath = os.path.join(stpath, name)
+                if os.path.isdir(totalpath) or stopwith == 'file':
                     if withlink:
                         totalstr_arr += [
-                            '* [' + dir_name + ']({0})'.format(
-                                os.path.join(stpath, dir_name)[1:])
+                            '* [' + name + ']({0})'.format(totalpath[1:].replace(' ', '%20'))
                         ]
                     else:
-                        totalstr_arr += ['* ' + dir_name]
-                    tmpstr = rec_toc_f(os.path.join(stpath, dir_name),
-                                       stopwith=stopwith)
+                        totalstr_arr += ['* ' + name]
+                    tmpstr = rec_toc_f(totalpath, stopwith=stopwith)
                     if tmpstr is None or len(tmpstr) == 0:
                         continue
                     tmpstr = list(map(lambda x: '   ' + x, tmpstr))
                     totalstr_arr += tmpstr
-
-                if stopwith == 'file':
-                    for file in files:
-                        if file[0] in firstNotInSet:
-                            continue
-                        file_name = os.path.splitext(file)[0]
-                        if withlink:
-                            totalstr_arr += [
-                                '* [' + filename + ']({0})'.format(
-                                    os.path.join(stpath, filename)[1:])
-                            ]
-                        else:
-                            totalstr_arr += ['* ' + filename]
             return totalstr_arr
 
         tarr = rec_toc_f(stpath, stopwith)
@@ -63,6 +48,7 @@ def toc(file='README.md',
 
         data = data.replace('[toc]', toc)
         with open('README.md', 'w', encoding='utf-8') as f:
+            f.write(data)
 
 
 if __name__ == '__main__':
